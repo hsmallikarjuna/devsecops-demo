@@ -5,21 +5,16 @@
 //           → Deploy → Archive
 //
 // Required Jenkins plugins:
-//   • NodeJS Plugin            (nodejs tool)
 //   • SonarQube Scanner Plugin (withSonarQubeEnv)
 //   • OWASP Dependency-Check   (dependencyCheck / dependencyCheckPublisher)
 //   • HTML Publisher Plugin    (publishHTML)
-//   • Docker Pipeline Plugin   (docker commands via sh)
+//
+// Node.js 22 is installed directly in the Jenkins Docker image — no NodeJS
+// plugin or tools{} block needed. node/npm are available on PATH globally.
 // =============================================================================
 
 pipeline {
     agent any
-
-    // NodeJS tool configured in: Manage Jenkins → Global Tool Configuration
-    // Name must match exactly: "NodeJS-22"
-    tools {
-        nodejs 'NodeJS-22'
-    }
 
     environment {
         APP_NAME            = 'devsecops-demo'
