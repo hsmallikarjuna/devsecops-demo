@@ -197,10 +197,18 @@ pipeline {
 
                 // Generate HTML report — catchError marks build UNSTABLE instead
                 // of FAILURE so the pipeline always continues to the Archive stage
+                // Trivy v0.60+ dropped --format html; use template format instead.
+                // Download the official HTML template from the Trivy repo at runtime.
+                sh """
+                    curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/html.tpl \
+                        -o /tmp/trivy-html.tpl || true
+                """
+
                 catchError(buildResult: 'UNSTABLE', stageResult: 'UNSTABLE') {
                     sh """
                         trivy image \
-                            --format html \
+                            --format template \
+                            --template '@/tmp/trivy-html.tpl' \
                             --output ${REPORTS_DIR}/trivy-report.html \
                             --severity HIGH,CRITICAL \
                             --exit-code 1 \
@@ -244,10 +252,11 @@ pipeline {
                 // Allow the container time to initialise before the smoke test
                 sh 'sleep 5'
                 sh "docker ps | grep ${APP_NAME}"
-                // Smoke test: verify the health endpoint returns "UP"
-                sh 'curl -sf http://localhost:3000/health | grep UP'
-                sh 'curl -sf http://localhost:3000/'
-                sh 'curl -sf http://localhost:3000/version'
+                // Smoke test: run wget INSIDE the app container (avoids the
+                // Jenkins-container-to-host network routing problem with localhost).
+                sh "docker exec ${APP_NAME} wget -qO- http://localhost:3000/health"
+                sh "docker exec ${APP_NAME} wget -qO- http://localhost:3000/"
+                sh "docker exec ${APP_NAME} wget -qO- http://localhost:3000/version"
             }
         }
 
