@@ -137,6 +137,9 @@ pipeline {
                 // image (/usr/local/bin/dependency-check) — no plugin tool manager needed.
                 // The || true ensures the stage never hard-fails on findings so
                 // the Archive stage always runs.
+                // --noupdate skips the NVD database download (avoids HTTP 524
+                // timeouts from the NVD API). The local H2 cache is used instead.
+                // Remove --noupdate after obtaining an NVD API key for full CVE data.
                 sh """
                     dependency-check \
                         --scan ./ \
@@ -144,18 +147,27 @@ pipeline {
                         --format HTML \
                         --format XML \
                         --prettyPrint \
+                        --noupdate \
                         --exclude 'node_modules/.cache/**' || true
                 """
             }
             post {
                 always {
-                    // Parse XML results and add trend graph to Jenkins job sidebar
-                    dependencyCheckPublisher(
-                        pattern             : 'reports/dependency-check-report.xml',
-                        failedTotalCritical : 0,
-                        unstableTotalHigh   : 10,
-                        stopBuild           : false
+                    // dependencyCheckPublisher requires the OWASP DC Jenkins plugin.
+                    // Using publishHTML + archiveArtifacts as a plugin-free alternative.
+                    archiveArtifacts(
+                        artifacts        : 'reports/dependency-check-report.*',
+                        allowEmptyArchive: true,
+                        fingerprint      : true
                     )
+                    publishHTML(target: [
+                        allowMissing         : true,
+                        alwaysLinkToLastBuild: true,
+                        keepAll              : true,
+                        reportDir            : 'reports',
+                        reportFiles          : 'dependency-check-report.html',
+                        reportName           : 'OWASP Dependency Check'
+                    ])
                 }
             }
         }
