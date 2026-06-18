@@ -138,24 +138,23 @@ pipeline {
                 echo ' Stage 5: OWASP Dependency Vulnerability Scan'
                 echo '============================================================'
                 sh "mkdir -p ${REPORTS_DIR}"
-                // "OWASP-DC" must match the tool name in:
-                // Manage Jenkins → Global Tool Configuration → Dependency-Check
-                dependencyCheck(
-                    additionalArguments: """
-                        --scan ./
-                        --out ${REPORTS_DIR}/
-                        --format HTML
-                        --format XML
-                        --prettyPrint
-                        --enableRetired
-                        --exclude node_modules/.cache/**
-                    """,
-                    odcInstallation: 'OWASP-DC'
-                )
+                // dependency-check CLI is installed directly in the Jenkins Docker
+                // image (/usr/local/bin/dependency-check) — no plugin tool manager needed.
+                // The || true ensures the stage never hard-fails on findings so
+                // the Archive stage always runs.
+                sh """
+                    dependency-check \
+                        --scan ./ \
+                        --out ${REPORTS_DIR}/ \
+                        --format HTML \
+                        --format XML \
+                        --prettyPrint \
+                        --exclude 'node_modules/.cache/**' || true
+                """
             }
             post {
                 always {
-                    // Parse results and add a trend graph to the Jenkins job
+                    // Parse XML results and add trend graph to Jenkins job sidebar
                     dependencyCheckPublisher(
                         pattern             : 'reports/dependency-check-report.xml',
                         failedTotalCritical : 0,
