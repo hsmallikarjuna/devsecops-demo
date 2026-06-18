@@ -1,0 +1,46 @@
+# =============================================================================
+# .dockerignore — files excluded from the Docker build context
+# Keeps the image lean and prevents accidental inclusion of secrets/dev files
+# =============================================================================
+
+# Version control metadata
+.git
+.gitignore
+
+# Node.js development artifacts (re-installed inside the container)
+node_modules
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.npm
+
+# Test files (not needed at runtime)
+test/
+
+# Generated reports (produced during CI, not part of the app)
+reports/
+
+# CI/CD and tooling configuration
+Jenkinsfile
+sonar-project.properties
+.github/
+
+# Documentation
+*.md
+README*
+CHANGELOG*
+
+# Environment files (secrets must never be baked into images)
+.env
+.env.*
+
+# OS artifacts
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE project files
+.vscode/
+.idea/
+*.swp
+*.swo

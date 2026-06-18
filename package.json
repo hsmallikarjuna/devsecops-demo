@@ -1,0 +1,55 @@
+{
+  "name": "devsecops-demo",
+  "version": "1.0.0",
+  "description": "Production-ready DevSecOps demo with secure CI/CD pipeline using Jenkins, SonarQube, OWASP Dependency-Check, and Trivy",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js",
+    "test": "jest --forceExit",
+    "test:coverage": "jest --coverage --forceExit",
+    "test:ci": "jest --coverage --forceExit --coverageReporters=lcov text"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.18.2",
+    "helmet": "^7.1.0",
+    "lodash": "4.17.4",
+    "morgan": "^1.10.0"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "supertest": "^6.3.4"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "coverageDirectory": "reports/coverage",
+    "collectCoverageFrom": [
+      "app.js",
+      "routes/**/*.js"
+    ],
+    "coverageThreshold": {
+      "global": {
+        "branches": 80,
+        "functions": 80,
+        "lines": 80,
+        "statements": 80
+      }
+    }
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "keywords": [
+    "devsecops",
+    "jenkins",
+    "sonarqube",
+    "owasp",
+    "trivy",
+    "security",
+    "ci-cd",
+    "express",
+    "nodejs"
+  ],
+  "author": "DevSecOps Demo",
+  "license": "MIT"
+}
