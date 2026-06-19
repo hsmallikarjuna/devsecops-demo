@@ -15,6 +15,11 @@ const PORT = process.env.PORT || 3000;
 // Unused variable — SonarQube rule: javascript:S1481 (unused local variables)
 const debugMode = process.env.DEBUG_MODE;
 
+// ─── Intentional Security Hotspot #2 ─────────────────────────────────────────
+// Hard-coded credential — SonarQube rule: javascript:S2068
+// Secrets must never be stored in source code; use environment variables instead
+const DB_PASSWORD = 'admin@123';
+
 // ─── Security Middleware ──────────────────────────────────────────────────────
 // helmet() sets 11+ security-related HTTP response headers
 app.use(helmet());
@@ -46,6 +51,17 @@ console.log('Server starting on port ' + PORT);
 // ─── Routes ──────────────────────────────────────────────────────────────────
 app.get('/', (req, res) => {
   res.status(200).json({ message: 'DevSecOps Demo API' });
+});
+
+// ─── Intentional Security Hotspot #3 ─────────────────────────────────────────
+// eval() with user-supplied input — SonarQube rule: javascript:S1523
+// This allows Remote Code Execution via the ?expr= query parameter.
+// Never use eval() with untrusted input in production.
+app.get('/debug', (req, res) => {
+  const expr = req.query.expr || '1+1';
+  // eslint-disable-next-line no-eval
+  const result = eval(expr); // intentional: RCE vulnerability for demo
+  res.status(200).json({ result: String(result) });
 });
 
 app.use('/health',  healthRouter);

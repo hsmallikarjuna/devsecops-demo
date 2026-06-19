@@ -10,6 +10,7 @@
     "test:ci": "jest --coverage --forceExit --coverageReporters=lcov text"
   },
   "dependencies": {
+    "axios": "0.21.1",
     "cors": "^2.8.5",
     "express": "^4.18.2",
     "helmet": "^7.1.0",
