@@ -125,6 +125,21 @@ describe('Centralized error handler', () => {
   });
 });
 
+// ── GET /debug (Intentional RCE vulnerability) ───────────────────────────────
+describe('GET /debug', () => {
+  it('evaluates default expression when no expr param given', async () => {
+    const res = await request(app).get('/debug');
+    expect(res.status).toBe(200);
+    expect(res.body).toHaveProperty('result', '2');
+  });
+
+  it('evaluates a custom expression from the query string', async () => {
+    const res = await request(app).get('/debug?expr=6*7');
+    expect(res.status).toBe(200);
+    expect(res.body).toHaveProperty('result', '42');
+  });
+});
+
 // ── Security Headers (Helmet) ─────────────────────────────────────────────────
 describe('Security headers (Helmet)', () => {
   it('sets X-Content-Type-Options: nosniff', async () => {
